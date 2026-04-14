@@ -1,0 +1,29 @@
+{
+  "__comment": "示例配置文件。非敏感运行参数放在 app_config.json；密钥和数据库连接请放到 .env。",
+  "__auth_comment": "受保护接口使用请求头鉴权：X-API-Key 或 Authorization: Bearer。api_key 与 admin_api_key 现通过 .env 提供。",
+  "api_key_header_names": [
+    "x-api-key"
+  ],
+  "enable_docs": false,
+  "trust_proxy_headers": false,
+  "trusted_proxy_cidrs": [
+    "127.0.0.1/32"
+  ],
+  "__a2s_comment": "数据库服和社区服都按固定 5 秒刷新 A2S 缓存。",
+  "a2s_timeout": 5.0,
+  "serverlist_a2s_total_timeout": 6.0,
+  "serverlist_refresh_interval": 5,
+  "community_serverlist_refresh_interval": 5,
+  "__rate_limit_comment": "以下限流用于降低刷接口和 CC 风险，同时保留正常调用冗余。",
+  "serverlist_limit_per_minute": 300,
+  "api_burst_limit": 80,
+  "api_burst_window_seconds": 10,
+  "serverlist_burst_limit": 60,
+  "serverlist_burst_window_seconds": 10,
+  "whitelist_limit_per_minute": 180,
+  "whitelist_burst_limit": 30,
+  "whitelist_burst_window_seconds": 10,
+  "whitelist_refresh_interval": 30,
+  "auth_fail_limit_per_minute": 20,
+  "auth_ban_seconds": 600
+}

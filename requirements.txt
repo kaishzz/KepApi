@@ -1,0 +1,7 @@
+fastapi
+uvicorn
+sqlalchemy
+pymysql
+cryptography>=46.0.7
+python-a2s
+rcon
