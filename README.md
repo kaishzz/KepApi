@@ -124,6 +124,61 @@ python main.py
 
 - `http://127.0.0.1:8001`
 
+## 使用 systemd 托管
+
+生产环境建议使用 `systemd` 托管 KepApi，而不是 `crontab` 或 `screen`。下面的示例假设部署目录为 `/opt/kepapi`，并且目录中已经包含：
+
+- `kepapi`
+- `.env`
+- `app_config.json`
+
+创建服务文件：
+
+```bash
+cat >/etc/systemd/system/kepapi.service <<'EOF'
+[Unit]
+Description=KepApi
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/opt/kepapi
+ExecStart=/opt/kepapi/kepapi
+Restart=always
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
+EOF
+```
+
+加载并启动服务：
+
+```bash
+systemctl daemon-reload
+systemctl enable kepapi
+systemctl start kepapi
+```
+
+常用管理命令：
+
+```bash
+systemctl status kepapi
+systemctl restart kepapi
+systemctl stop kepapi
+journalctl -u kepapi -f
+```
+
+如果之前已经使用 `crontab` 在开机时启动 KepApi，请删除旧配置，避免重复启动：
+
+```bash
+crontab -e
+```
+
 ## 运行行为
 
 - 启动时会先检查后台目录表是否存在
