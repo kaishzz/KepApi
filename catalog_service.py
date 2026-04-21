@@ -36,7 +36,7 @@ def list_kepcs_servers(engine) -> list[dict[str, Any]]:
     rows = _fetch_rows(
         engine,
         """
-        SELECT id, shotid, mode, name, host, port, is_active
+        SELECT id, mode, name, host, port, is_active
         FROM cs2_serverlist.servers
         ORDER BY id ASC
         """,
@@ -50,13 +50,12 @@ def create_kepcs_server(engine, payload: dict[str, Any]) -> dict[str, Any]:
             text(
                 """
                 INSERT INTO cs2_serverlist.servers
-                (shotid, mode, name, host, port, is_active)
+                (mode, name, host, port, is_active)
                 VALUES
-                (:shotid, :mode, :name, :host, :port, :is_active)
+                (:mode, :name, :host, :port, :is_active)
                 """
             ),
             {
-                "shotid": payload["shotid"],
                 "mode": payload["mode"],
                 "name": payload["name"],
                 "host": payload["host"],
@@ -74,7 +73,6 @@ def update_kepcs_server(engine, server_id: int, payload: dict[str, Any]) -> dict
     params: dict[str, Any] = {"id": server_id}
 
     for source_key, column_name in (
-        ("shotid", "shotid"),
         ("mode", "mode"),
         ("name", "name"),
         ("host", "host"),
@@ -120,7 +118,7 @@ def get_kepcs_server(engine, server_id: int) -> dict[str, Any] | None:
     rows = _fetch_rows(
         engine,
         """
-        SELECT id, shotid, mode, name, host, port, is_active
+        SELECT id, mode, name, host, port, is_active
         FROM cs2_serverlist.servers
         WHERE id = :id
         LIMIT 1

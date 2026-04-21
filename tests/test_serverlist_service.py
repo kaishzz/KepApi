@@ -20,11 +20,10 @@ from serverlist_service import (
 
 
 class ServerlistServiceTests(unittest.TestCase):
-    def test_build_server_item_keeps_shotid_immediately_after_id(self):
+    def test_build_server_item_keeps_mode_and_community_metadata_near_front(self):
         row = {
             "id": 1,
-            "shotid": "db-1",
-            "mode": "ze",
+            "mode": "ze_pt",
             "community": "fys",
             "name": "Server A",
             "host": "127.0.0.1",
@@ -52,15 +51,14 @@ class ServerlistServiceTests(unittest.TestCase):
 
         item = asyncio.run(run_test())
         self.assertEqual(
-            list(item.keys())[:5],
-            ["id", "shotid", "mode", "community", "name"],
+            list(item.keys())[:4],
+            ["id", "mode", "community", "name"],
         )
         self.assertEqual(item["status"], "ok")
 
     def test_build_server_item_marks_timeout_after_retries(self):
         row = {
             "id": 1,
-            "shotid": "db-1",
             "name": "Server A",
             "host": "127.0.0.1",
             "port": 27015,

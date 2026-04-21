@@ -28,7 +28,7 @@ def fetch_database_server_rows(engine):
     return fetch_query_rows(
         engine,
         """
-        SELECT id, shotid, mode, name, host, port
+        SELECT id, mode, name, host, port
         FROM cs2_serverlist.servers
         WHERE is_active = 1
         ORDER BY id ASC
@@ -54,13 +54,11 @@ async def build_server_item(
     a2s_timeout: float,
     total_timeout: float,
     max_retries: int,
-    include_shotid: bool = True,
     include_mode: bool = False,
     include_community: bool = False,
 ):
     row = dict(row)
     server_id = row.get("id")
-    shot_id = row.get("shotid")
     mode = row.get("mode")
     community = row.get("community")
     name = row.get("name")
@@ -68,8 +66,6 @@ async def build_server_item(
     port = int(row["port"])
 
     item = {"id": server_id}
-    if include_shotid:
-        item["shotid"] = shot_id
     if include_mode:
         item["mode"] = mode
     if include_community:

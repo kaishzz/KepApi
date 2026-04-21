@@ -137,7 +137,6 @@ _admin_write_rules = (
 async def _build_items(
     rows,
     *,
-    include_shotid: bool,
     include_mode: bool = False,
     include_community: bool = False,
 ) -> list[dict]:
@@ -149,7 +148,6 @@ async def _build_items(
                 a2s_timeout=A2S_TIMEOUT,
                 total_timeout=SERVERLIST_A2S_TOTAL_TIMEOUT,
                 max_retries=A2S_MAX_RETRIES,
-                include_shotid=include_shotid,
                 include_mode=include_mode,
                 include_community=include_community,
             )
@@ -162,7 +160,7 @@ async def refresh_serverlist_cache_once() -> int:
     try:
         rows = await asyncio.to_thread(fetch_database_server_rows, engine)
         items = (
-            await _build_items(rows, include_shotid=True, include_mode=True)
+            await _build_items(rows, include_mode=True)
             if rows
             else []
         )
@@ -193,7 +191,7 @@ async def refresh_community_serverlist_cache_once() -> int:
     try:
         rows = await asyncio.to_thread(fetch_community_server_rows, engine)
         items = (
-            await _build_items(rows, include_shotid=False, include_community=True)
+            await _build_items(rows, include_community=True)
             if rows
             else []
         )
@@ -386,7 +384,6 @@ def _normalize_kepcs_server_payload(payload: dict, *, partial: bool) -> dict:
 
     normalized: dict = {}
     fields = {
-        "shotid": ("ShotID", 1, 64),
         "mode": ("模式", 1, 32),
         "name": ("名称", 1, 191),
         "host": ("主机地址", 1, 191),
