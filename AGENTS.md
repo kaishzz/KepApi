@@ -4,11 +4,11 @@ These rules apply to the `E:\GitHubProjects\KepRepository\KepApi` workspace.
 
 ## Common Requirements
 
-- Before working in this project, first read the shared requirements file at `E:\GitHubProjects\andrej-karpathy-skills\EXAMPLES.md`.
-- Treat `E:\GitHubProjects\andrej-karpathy-skills\EXAMPLES.md` as the common baseline instruction set for this project.
+- Before working in this project, first read the shared requirements file at `C:\Users\24854\.codex\AGENTS.md`.
+- Treat `C:\Users\24854\.codex\AGENTS.md` as the common baseline instruction set for this project.
 - Apply the shared requirements first, then apply the KepApi-specific rules in this file.
 - If a shared requirement conflicts with an explicit rule in this file, follow this file for work inside `E:\GitHubProjects\KepRepository\KepApi`.
-- Do not duplicate the full example content here; the external `EXAMPLES.md` is the source of truth.
+- Do not duplicate the shared baseline content here; `C:\Users\24854\.codex\AGENTS.md` is the source of truth for it.
 
 ### Canonical Path
 
