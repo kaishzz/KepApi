@@ -169,13 +169,6 @@ SERVERLIST_REFRESH_INTERVAL = _read_setting(
     "KEPAPI_SERVERLIST_REFRESH_INTERVAL", "serverlist_refresh_interval", 5.0, cast=float
 )
 
-COMMUNITY_SERVERLIST_REFRESH_INTERVAL = _read_setting(
-    "KEPAPI_COMMUNITY_SERVERLIST_REFRESH_INTERVAL",
-    "community_serverlist_refresh_interval",
-    5.0,
-    cast=float,
-)
-
 SERVERLIST_LIMIT_PER_MINUTE = _read_setting(
     "KEPAPI_SERVERLIST_LIMIT_PER_MINUTE",
     "serverlist_limit_per_minute",
@@ -274,7 +267,6 @@ for value, label in (
     (A2S_TIMEOUT, "a2s_timeout"),
     (SERVERLIST_A2S_TOTAL_TIMEOUT, "serverlist_a2s_total_timeout"),
     (SERVERLIST_REFRESH_INTERVAL, "serverlist_refresh_interval"),
-    (COMMUNITY_SERVERLIST_REFRESH_INTERVAL, "community_serverlist_refresh_interval"),
     (SERVERLIST_BURST_WINDOW_SECONDS, "serverlist_burst_window_seconds"),
     (API_BURST_WINDOW_SECONDS, "api_burst_window_seconds"),
     (WHITELIST_BURST_WINDOW_SECONDS, "whitelist_burst_window_seconds"),

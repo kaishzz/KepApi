@@ -203,7 +203,6 @@ cython_debug/
 .cursorignore
 .cursorindexingignore
 app_config.json
-community_servers.json
 
 # Marimo
 marimo/_static/

@@ -10,10 +10,9 @@ KepApi 是 KepCs 体系里的数据源服务，基于 FastAPI 提供服务器列
 ## 当前职责
 
 - 对外提供开水服服务器列表接口
-- 对外提供社区服服务器列表接口
 - 对外提供白名单缓存接口
 - 使用 A2S 补充地图、人数、在线状态等实时信息
-- 提供后台开水服目录与社区服目录的增删改查接口
+- 提供后台开水服目录的增删改查接口
 - 启动时自动预热缓存并按固定间隔后台刷新
 - 提供 API Key 鉴权、限流、可信代理校验和基础安全响应头
 
@@ -24,7 +23,6 @@ KepApi 是 KepCs 体系里的数据源服务，基于 FastAPI 提供服务器列
 - `GET /health`
 - `GET /api/kepcs/serverlist`
 - `GET /api/kepcs/whitelist`
-- `GET /api/community/serverlist`
 
 后台目录接口：
 
@@ -32,10 +30,6 @@ KepApi 是 KepCs 体系里的数据源服务，基于 FastAPI 提供服务器列
 - `POST /api/admin/kepcs/servers`
 - `PATCH /api/admin/kepcs/servers/{server_id}`
 - `DELETE /api/admin/kepcs/servers/{server_id}`
-- `GET /api/admin/community/servers`
-- `POST /api/admin/community/servers`
-- `PATCH /api/admin/community/servers/{server_id}`
-- `DELETE /api/admin/community/servers/{server_id}`
 
 ## 鉴权
 

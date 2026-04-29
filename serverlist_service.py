@@ -55,12 +55,10 @@ async def build_server_item(
     total_timeout: float,
     max_retries: int,
     include_mode: bool = False,
-    include_community: bool = False,
 ):
     row = dict(row)
     server_id = row.get("id")
     mode = row.get("mode")
-    community = row.get("community")
     name = row.get("name")
     host = str(row.get("host") or row.get("ip") or "").strip()
     port = int(row["port"])
@@ -68,8 +66,6 @@ async def build_server_item(
     item = {"id": server_id}
     if include_mode:
         item["mode"] = mode
-    if include_community:
-        item["community"] = community
     item.update(
         {
             "name": name or f"{host}:{port}",

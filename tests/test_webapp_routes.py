@@ -115,11 +115,8 @@ class WebappRouteTests(unittest.TestCase):
 
         self.assertIn("/api/kepcs/serverlist", route_paths)
         self.assertIn("/api/kepcs/whitelist", route_paths)
-        self.assertIn("/api/community/serverlist", route_paths)
         self.assertIn("/api/admin/kepcs/servers", route_paths)
         self.assertIn("/api/admin/kepcs/servers/{server_id}", route_paths)
-        self.assertIn("/api/admin/community/servers", route_paths)
-        self.assertIn("/api/admin/community/servers/{server_id}", route_paths)
         self.assertNotIn("/api/serverlist", route_paths)
         self.assertNotIn("/api/whitelist", route_paths)
 
@@ -128,7 +125,6 @@ class WebappRouteTests(unittest.TestCase):
             {job.name for job in get_refresh_jobs()},
             {
                 "serverlist_cache",
-                "community_serverlist_cache",
                 "whitelist_cache",
             },
         )

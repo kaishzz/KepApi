@@ -20,11 +20,10 @@ from serverlist_service import (
 
 
 class ServerlistServiceTests(unittest.TestCase):
-    def test_build_server_item_keeps_mode_and_community_metadata_near_front(self):
+    def test_build_server_item_keeps_mode_metadata_near_front(self):
         row = {
             "id": 1,
             "mode": "ze_pt",
-            "community": "fys",
             "name": "Server A",
             "host": "127.0.0.1",
             "port": 27015,
@@ -45,14 +44,13 @@ class ServerlistServiceTests(unittest.TestCase):
                     a2s_timeout=0.1,
                     total_timeout=0.2,
                     max_retries=1,
-                    include_community=True,
                     include_mode=True,
                 )
 
         item = asyncio.run(run_test())
         self.assertEqual(
-            list(item.keys())[:4],
-            ["id", "mode", "community", "name"],
+            list(item.keys())[:3],
+            ["id", "mode", "name"],
         )
         self.assertEqual(item["status"], "ok")
 

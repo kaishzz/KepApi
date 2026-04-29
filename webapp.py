@@ -5,18 +5,18 @@ from dataclasses import dataclass
 from typing import Awaitable, Callable
 
 from fastapi import Depends, FastAPI, HTTPException, Request
+
 from app_config import (
+    ADMIN_API_KEY,
     API_BURST_LIMIT,
     API_BURST_WINDOW_SECONDS,
     API_KEY,
     API_KEY_HEADER_NAMES,
-    ADMIN_API_KEY,
     A2S_MAX_RETRIES,
     A2S_TIMEOUT,
     AUTH_BAN_SECONDS,
     AUTH_BAN_STATE_CLEANUP_INTERVAL,
     AUTH_FAIL_LIMIT_PER_MINUTE,
-    COMMUNITY_SERVERLIST_REFRESH_INTERVAL,
     ENABLE_DOCS,
     RATE_LIMIT_STATE_CLEANUP_INTERVAL,
     SERVERLIST_A2S_CONCURRENCY,
@@ -34,15 +34,9 @@ from app_config import (
 )
 from cache_manager import SnapshotCacheStore, stop_background_task
 from catalog_service import (
-    create_community_server,
     create_kepcs_server,
-    delete_community_server,
     delete_kepcs_server,
-    ensure_catalog_tables,
-    fetch_community_server_rows,
-    list_community_servers,
     list_kepcs_servers,
-    update_community_server,
     update_kepcs_server,
 )
 from db import engine
@@ -77,7 +71,6 @@ _background_stop_event: asyncio.Event | None = None
 
 _serverlist_a2s_semaphore = asyncio.Semaphore(SERVERLIST_A2S_CONCURRENCY)
 _serverlist_cache_store = SnapshotCacheStore()
-_community_serverlist_cache_store = SnapshotCacheStore()
 _whitelist_cache_store = SnapshotCacheStore()
 
 _trusted_proxy_networks = parse_trusted_proxy_networks(TRUSTED_PROXY_CIDRS)
@@ -138,7 +131,6 @@ async def _build_items(
     rows,
     *,
     include_mode: bool = False,
-    include_community: bool = False,
 ) -> list[dict]:
     return await asyncio.gather(
         *[
@@ -149,7 +141,6 @@ async def _build_items(
                 total_timeout=SERVERLIST_A2S_TOTAL_TIMEOUT,
                 max_retries=A2S_MAX_RETRIES,
                 include_mode=include_mode,
-                include_community=include_community,
             )
             for row in rows
         ]
@@ -159,11 +150,7 @@ async def _build_items(
 async def refresh_serverlist_cache_once() -> int:
     try:
         rows = await asyncio.to_thread(fetch_database_server_rows, engine)
-        items = (
-            await _build_items(rows, include_mode=True)
-            if rows
-            else []
-        )
+        items = await _build_items(rows, include_mode=True) if rows else []
         await _serverlist_cache_store.replace(
             items, updated_at=now_str(), last_error=None
         )
@@ -187,35 +174,12 @@ async def refresh_whitelist_cache_once() -> int:
         return 0
 
 
-async def refresh_community_serverlist_cache_once() -> int:
-    try:
-        rows = await asyncio.to_thread(fetch_community_server_rows, engine)
-        items = (
-            await _build_items(rows, include_community=True)
-            if rows
-            else []
-        )
-        await _community_serverlist_cache_store.replace(
-            items, updated_at=now_str(), last_error=None
-        )
-        return len(rows)
-    except Exception as exc:
-        logger.exception("刷新 community serverlist 缓存失败")
-        await _community_serverlist_cache_store.set_error(str(exc))
-        return 0
-
-
 def get_refresh_jobs() -> tuple[RefreshJob, ...]:
     return (
         RefreshJob(
             name="serverlist_cache",
             interval_seconds=SERVERLIST_REFRESH_INTERVAL,
             refresh_once=refresh_serverlist_cache_once,
-        ),
-        RefreshJob(
-            name="community_serverlist_cache",
-            interval_seconds=COMMUNITY_SERVERLIST_REFRESH_INTERVAL,
-            refresh_once=refresh_community_serverlist_cache_once,
         ),
         RefreshJob(
             name="whitelist_cache",
@@ -259,7 +223,6 @@ async def refresh_all_caches_once():
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     global _background_stop_event, _background_tasks
-    await asyncio.to_thread(ensure_catalog_tables, engine)
     await refresh_all_caches_once()
     _background_stop_event = asyncio.Event()
     _background_tasks = {
@@ -406,39 +369,6 @@ def _normalize_kepcs_server_payload(payload: dict, *, partial: bool) -> dict:
     return normalized
 
 
-def _normalize_community_server_payload(payload: dict, *, partial: bool) -> dict:
-    if not isinstance(payload, dict):
-        raise HTTPException(status_code=422, detail="请求体必须是 JSON 对象")
-
-    normalized: dict = {}
-    fields = {
-        "community": ("社区标识", 1, 64),
-        "name": ("名称", 1, 191),
-        "host": ("主机地址", 1, 191),
-    }
-
-    for key, (label, minimum, maximum) in fields.items():
-        if key in payload:
-            normalized[key] = _to_clean_string(payload[key], label, minimum=minimum, maximum=maximum)
-        elif not partial:
-            raise HTTPException(status_code=422, detail=f"{label} 不能为空")
-
-    if "port" in payload:
-        normalized["port"] = _to_int(payload["port"], "端口", minimum=1, maximum=65535)
-    elif not partial:
-        raise HTTPException(status_code=422, detail="端口不能为空")
-
-    if "sort_order" in payload:
-        normalized["sort_order"] = _to_int(payload["sort_order"], "排序", minimum=0, maximum=9999)
-    elif not partial:
-        normalized["sort_order"] = 0
-
-    if "is_active" in payload or not partial:
-        normalized["is_active"] = _to_bool(payload.get("is_active", True))
-
-    return normalized
-
-
 @app.get("/api/kepcs/whitelist")
 async def get_players(_: None = Depends(require_whitelist_access)):
     return await _whitelist_cache_store.get_items()
@@ -447,11 +377,6 @@ async def get_players(_: None = Depends(require_whitelist_access)):
 @app.get("/api/kepcs/serverlist")
 async def get_server_list(_: None = Depends(require_serverlist_access)):
     return await _serverlist_cache_store.snapshot()
-
-
-@app.get("/api/community/serverlist")
-async def get_community_server_list(_: None = Depends(require_serverlist_access)):
-    return await _community_serverlist_cache_store.snapshot()
 
 
 @app.get("/api/admin/kepcs/servers")
@@ -501,54 +426,4 @@ async def delete_admin_kepcs_server(
     if not deleted:
         raise HTTPException(status_code=404, detail="服务器不存在")
     await refresh_serverlist_cache_once()
-    return {"success": True}
-
-
-@app.get("/api/admin/community/servers")
-async def get_admin_community_servers(_: None = Depends(require_admin_query_access)):
-    servers = await asyncio.to_thread(list_community_servers, engine)
-    return {"servers": servers}
-
-
-@app.post("/api/admin/community/servers")
-async def create_admin_community_server(
-    payload: dict,
-    _: None = Depends(require_admin_write_access),
-):
-    server = await asyncio.to_thread(
-        create_community_server,
-        engine,
-        _normalize_community_server_payload(payload, partial=False),
-    )
-    await refresh_community_serverlist_cache_once()
-    return {"server": server}
-
-
-@app.patch("/api/admin/community/servers/{server_id}")
-async def update_admin_community_server(
-    server_id: int,
-    payload: dict,
-    _: None = Depends(require_admin_write_access),
-):
-    server = await asyncio.to_thread(
-        update_community_server,
-        engine,
-        server_id,
-        _normalize_community_server_payload(payload, partial=True),
-    )
-    if server is None:
-        raise HTTPException(status_code=404, detail="社区服不存在")
-    await refresh_community_serverlist_cache_once()
-    return {"server": server}
-
-
-@app.delete("/api/admin/community/servers/{server_id}")
-async def delete_admin_community_server(
-    server_id: int,
-    _: None = Depends(require_admin_write_access),
-):
-    deleted = await asyncio.to_thread(delete_community_server, engine, server_id)
-    if not deleted:
-        raise HTTPException(status_code=404, detail="社区服不存在")
-    await refresh_community_serverlist_cache_once()
     return {"success": True}
