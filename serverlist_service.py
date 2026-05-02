@@ -41,7 +41,7 @@ def fetch_whitelist_rows(engine):
         engine,
         """
         SELECT UserID, SteamID
-        FROM cs2_kepcore.kep_player_info
+        FROM cs2_playtime.kep_player_info
         ORDER BY UserID ASC
         """,
     )

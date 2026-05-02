@@ -4,7 +4,7 @@ from sqlalchemy.engine import URL
 from app_config import DB_CHARSET, DB_HOST, DB_PASS, DB_PORT, DB_USER
 
 
-# 不指定默认 database，使同一个连接可查询多个 schema（如 cs2_kepcore/cs2_serverlist）
+# 不指定默认 database，使同一个连接可查询多个 schema（如 cs2_playtime/cs2_serverlist）
 DB_DSN = URL.create(
     "mysql+pymysql",
     username=DB_USER,
