@@ -2,14 +2,17 @@
 
 KepApi 是 KepCs 体系里的数据源服务，基于 FastAPI 提供服务器列表、白名单和后台服务器目录管理接口。
 
-当前正式使用的开水服 `mode` 标识为：
+当前正式使用的开水服 `mode` 标识和展示名由网站项目维护的 `cs2_serverlist.server_modes` 提供：
 
 - `ze_xl`：训练服
 - `ze_pt`：跑图服
+- `kz`：攀岩服
+- `surf`：滑翔服
 
 ## 当前职责
 
 - 对外提供开水服服务器列表接口
+- 为服务器列表返回 `mode` 和数据库维护的 `mode_name`
 - 对外提供白名单缓存接口
 - 使用 A2S 补充地图、人数、在线状态等实时信息
 - 提供后台开水服目录的增删改查接口
@@ -93,7 +96,7 @@ py -3 -m unittest discover -s tests
 
 ## 运行说明
 
-- 开水服目录直接使用当前 `mode` 值 `ze_xl` / `ze_pt`
+- 开水服目录使用 `mode` 标识，展示名通过 `cs2_serverlist.server_modes.display_name` 返回为 `mode_name`
 - 缓存启动时会立即预热，随后按配置定时刷新
 - `/api/*` 默认返回 `Cache-Control: no-store`
 - 文档接口默认关闭，只有启用 `enable_docs` 后才开放

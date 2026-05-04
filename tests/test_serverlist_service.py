@@ -16,14 +16,51 @@ if "sqlalchemy" not in sys.modules:
 
 from serverlist_service import (
     build_server_item,
+    fetch_database_server_rows,
 )
 
 
 class ServerlistServiceTests(unittest.TestCase):
+    def test_fetch_database_server_rows_includes_mode_display_name(self):
+        class FakeResult:
+            def mappings(self):
+                return self
+
+            def all(self):
+                return []
+
+        class FakeConnection:
+            def __enter__(self):
+                return self
+
+            def __exit__(self, exc_type, exc, tb):
+                return False
+
+            def execute(self, query):
+                self.query = query
+                return FakeResult()
+
+        class FakeEngine:
+            def __init__(self):
+                self.connection = FakeConnection()
+
+            def connect(self):
+                return self.connection
+
+        engine = FakeEngine()
+
+        fetch_database_server_rows(engine)
+
+        query = str(engine.connection.query)
+        self.assertIn("server_modes", query)
+        self.assertIn("mode_name", query)
+        self.assertIn("sort_order", query)
+
     def test_build_server_item_keeps_mode_metadata_near_front(self):
         row = {
             "id": 1,
             "mode": "ze_pt",
+            "mode_name": "跑图服",
             "name": "Server A",
             "host": "127.0.0.1",
             "port": 27015,
@@ -49,9 +86,10 @@ class ServerlistServiceTests(unittest.TestCase):
 
         item = asyncio.run(run_test())
         self.assertEqual(
-            list(item.keys())[:3],
-            ["id", "mode", "name"],
+            list(item.keys())[:4],
+            ["id", "mode", "mode_name", "name"],
         )
+        self.assertEqual(item["mode_name"], "跑图服")
         self.assertEqual(item["status"], "ok")
 
     def test_build_server_item_marks_timeout_after_retries(self):

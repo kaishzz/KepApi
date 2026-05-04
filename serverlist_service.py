@@ -28,10 +28,19 @@ def fetch_database_server_rows(engine):
     return fetch_query_rows(
         engine,
         """
-        SELECT id, mode, name, host, port
-        FROM cs2_serverlist.servers
-        WHERE is_active = 1
-        ORDER BY id ASC
+        SELECT
+            s.id,
+            s.mode,
+            COALESCE(m.display_name, s.mode) AS mode_name,
+            s.name,
+            s.host,
+            s.port
+        FROM cs2_serverlist.servers AS s
+        LEFT JOIN cs2_serverlist.server_modes AS m
+            ON m.mode = s.mode
+            AND m.is_active = 1
+        WHERE s.is_active = 1
+        ORDER BY COALESCE(m.sort_order, 0) ASC, s.id ASC
         """,
     )
 
@@ -59,6 +68,7 @@ async def build_server_item(
     row = dict(row)
     server_id = row.get("id")
     mode = row.get("mode")
+    mode_name = row.get("mode_name")
     name = row.get("name")
     host = str(row.get("host") or row.get("ip") or "").strip()
     port = int(row["port"])
@@ -66,6 +76,7 @@ async def build_server_item(
     item = {"id": server_id}
     if include_mode:
         item["mode"] = mode
+        item["mode_name"] = mode_name or mode
     item.update(
         {
             "name": name or f"{host}:{port}",
