@@ -2,12 +2,7 @@
 
 KepApi 是 KepCs 体系里的数据源服务，基于 FastAPI 提供服务器列表、白名单和后台服务器目录管理接口。
 
-当前正式使用的开水服 `mode` 标识和展示名由网站项目维护的 `cs2_serverlist.server_modes` 提供：
-
-- `ze_xl`：训练服
-- `ze_pt`：跑图服
-- `kz`：攀岩服
-- `surf`：滑翔服
+当前正式使用的开水服 `mode` 标识来自 `cs2_serverlist.servers`，展示名来自网站项目维护的 `cs2_serverlist.server_modes`。
 
 ## 当前职责
 

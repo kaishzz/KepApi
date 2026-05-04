@@ -59,8 +59,8 @@ class ServerlistServiceTests(unittest.TestCase):
     def test_build_server_item_keeps_mode_metadata_near_front(self):
         row = {
             "id": 1,
-            "mode": "ze_pt",
-            "mode_name": "跑图服",
+            "mode": "mode_a",
+            "mode_name": "模式A",
             "name": "Server A",
             "host": "127.0.0.1",
             "port": 27015,
@@ -89,7 +89,7 @@ class ServerlistServiceTests(unittest.TestCase):
             list(item.keys())[:4],
             ["id", "mode", "mode_name", "name"],
         )
-        self.assertEqual(item["mode_name"], "跑图服")
+        self.assertEqual(item["mode_name"], "模式A")
         self.assertEqual(item["status"], "ok")
 
     def test_build_server_item_marks_timeout_after_retries(self):
